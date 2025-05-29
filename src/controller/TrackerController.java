@@ -2,13 +2,16 @@ package controller;
 
 import model.JobApplication;
 import ui.TrackerView;
+import database.JobApplicationDatabase;
 
 public class TrackerController {
 
     private final TrackerView view;
+    //private final JobApplicationDatabase jobDB;
 
     public TrackerController(TrackerView view) {
         this.view = view;
+        //this.jobDB = new JobApplicationDatabase(); // create DB helper object
         setupListeners();
     }
 
@@ -25,9 +28,18 @@ public class TrackerController {
             }
 
             JobApplication job = new JobApplication(company, title, date, status);
+
+            // ✅ Save to observable list (for UI)
             view.jobList.add(job);
 
-            // Clear form
+            // ✅ Save to database
+            boolean success = JobApplicationDatabase.insertJob(job);
+            if (!success) {
+                showAlert("Failed to save to database.");
+                return;
+            }
+
+            // ✅ Clear form
             view.companyField.clear();
             view.titleField.clear();
             view.datePicker.setValue(null);
